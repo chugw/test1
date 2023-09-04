@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Trading Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>모의 주식 시뮬레이션</h1>
+    <canvas id="stock-chart" width="100" height="50"></canvas>
+    <canvas id="stock-chart"></canvas>
+    <button id="buy-button">Buy</button>
+    <button id="sell-button">Sell</button>
+    <p>Number of shares owned: <span id="shares-owned">0</span></p>
+    <p>Available funds: $<span id="available-funds">500</span></p>
+
+    <script>
+        const stockData = {
+            labels: [],
+            datasets: [{
+                label: 'Stock Price',
+                data: [], 
+                borderColor: 'rgba(75, 192, 192, 1)', 
+                borderWidth: 2, 
+                fill: false, 
+                tension: 0.1, 
+            }]
+        };
+
+        const ctx = document.getElementById('stock-chart').getContext('2d');
+        const stockChart = new Chart(ctx, {
+            type: 'line',
+            data: stockData,
+            options: {
+                scales: {
+                    x: [{
+                        display: false, 
+                    }],
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false, 
+                    },
+                    title: {
+                        display: true,
+                        text: 'Stock Price'
+                    }
+                }
+            }   
+        });
+
+        let sharesOwned = 0;
+        let availableFunds = 500;
+        const sharesOwnedElement = document.getElementById('shares-owned');
+        const availableFundsElement = document.getElementById('available-funds');
+
+        function updateStockChart() {
+            const priceChange = (Math.random() * 45 + 5).toFixed(2);
+
+            const currentTime = new Date();
+            stockData.labels.push(currentTime);
+            stockData.datasets[0].data.push(parseFloat(priceChange));
+         
+            if (stockData.labels.length > 10) {
+                stockData.labels.shift();
+                stockData.datasets[0].data.shift();
+            }
+
+            stockChart.update();
+        }
+
+        const buyButton = document.getElementById('buy-button');
+        buyButton.addEventListener('click', () => {
+     
+            if (availableFunds >= stockData.datasets[0].data[stockData.datasets[0].data.length - 1]) {
+                sharesOwned++;
+                sharesOwnedElement.innerText = sharesOwned;
+                availableFunds -= stockData.datasets[0].data[stockData.datasets[0].data.length - 1];
+                availableFundsElement.innerText = availableFunds.toFixed(2);
+            }
+        });
+
+        const sellButton = document.getElementById('sell-button');
+        sellButton.addEventListener('click', () => {
+         
+            if (sharesOwned > 0) {
+                sharesOwned--;
+                sharesOwnedElement.innerText = sharesOwned;
+                availableFunds += stockData.datasets[0].data[stockData.datasets[0].data.length - 1];
+                availableFundsElement.innerText = availableFunds.toFixed(2);
+            }
+        });
+
+        setInterval(updateStockChart, 5500);
+
+        for (let i = 0; i < 10; i++) {
+            updateStockChart();
+        }
+    </script>
+</body>
+</html>
